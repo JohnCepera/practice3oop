@@ -269,7 +269,283 @@ if __name__ == "__main__":
     
     # 10. Обращение по индексу и имени компоненты
     print(f"v3[0]: {v3[0]}, v3['y']: {v3['y']}, v3['z']: {v3['z']}")
+
+
+
+
+
+
+#---------------------------------------------------------------------------------------------------------------
+    import math
+
+class Point3d:
+    """Класс, представляющий точку в трехмерном пространстве."""
+    def __init__(self, x, y, z):
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
+
+    def __str__(self):
+        return "Point3d(" + str(round(self.x, 2)) + ", " + str(round(self.y, 2)) + ", " + str(round(self.z, 2)) + ")"
+
+    def __repr__(self):
+        return "Point3d(x=" + str(round(self.x, 2)) + ", y=" + str(round(self.y, 2)) + ", z=" + str(round(self.z, 2)) + ")"
+
+
+class Vector3d:
+    """Класс, представляющий вектор в трехмерном пространстве."""
+    def __init__(self, x, y, z):
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
+
+    def __str__(self):
+        return "(" + str(round(self.x, 2)) + ", " + str(round(self.y, 2)) + ", " + str(round(self.z, 2)) + ")"
+
+    def __repr__(self):
+        return "Vector3d(x=" + str(round(self.x, 2)) + ", y=" + str(round(self.y, 2)) + ", z=" + str(round(self.z, 2)) + ")"
+
+    @classmethod
+    def from_points(cls, start, end):
+        """Фабричный метод создания вектора из двух точек."""
+        return cls(end.x - start.x, end.y - start.y, end.z - start.z)
+
+    def magnitude(self):
+        """Вычисление точной математической длины вектора."""
+        return math.sqrt(self.x**2 + self.y**2 + self.z**2)
+
+    def __len__(self):
+        """
+        Магический метод взятия длины. 
+        Возвращает округленную длину, так как __len__ обязан возвращать int.
+        """
+        return int(round(self.magnitude()))
+
+    # Операции сравнения
+    def __eq__(self, other):
+        if not isinstance(other, Vector3d):
+            return False
+        return abs(self.x - other.x) < 1e-9 and abs(self.y - other.y) < 1e-9 and abs(self.z - other.z) < 1e-9
+
+    def __lt__(self, other):
+        if not isinstance(other, Vector3d):
+            return NotImplemented
+        return self.magnitude() < other.magnitude()
+
+    def __gt__(self, other):
+        if not isinstance(other, Vector3d):
+            return NotImplemented
+        return self.magnitude() > other.magnitude()
+
+    # Вспомогательный метод преобразования чисел в квази-вектор для удобства расчетов
+    def _to_vector(self, other):
+        if isinstance(other, Vector3d):
+            return other
+        elif isinstance(other, (int, float)):
+            return Vector3d(other, other, other)
+        return NotImplemented
+
+    # Арифметические операции (+, -, *, /)
+    def __add__(self, other):
+        v = self._to_vector(other)
+        if v is NotImplemented: return NotImplemented
+        return Vector3d(self.x + v.x, self.y + v.y, self.z + v.z)
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __sub__(self, other):
+        v = self._to_vector(other)
+        if v is NotImplemented: return NotImplemented
+        return Vector3d(self.x - v.x, self.y - v.y, self.z - v.z)
+
+    def __rsub__(self, other):
+        v = self._to_vector(other)
+        if v is NotImplemented: return NotImplemented
+        return Vector3d(v.x - self.x, v.y - self.y, v.z - self.z)
+
+    def __mul__(self, other):
+        v = self._to_vector(other)
+        if v is NotImplemented: return NotImplemented
+        return Vector3d(self.x * v.x, self.y * v.y, self.z * v.z)
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __truediv__(self, other):
+        v = self._to_vector(other)
+        if v is NotImplemented: return NotImplemented
+        if v.x == 0 or v.y == 0 or v.z == 0:
+            raise ZeroDivisionError("Деление на ноль компоненты вектора.")
+        return Vector3d(self.x / v.x, self.y / v.y, self.z / v.z)
+
+    def __rtruediv__(self, other):
+        v = self._to_vector(other)
+        if v is NotImplemented: return NotImplemented
+        if self.x == 0 or self.y == 0 or self.z == 0:
+            raise ZeroDivisionError("Деление на ноль компоненты вектора.")
+        return Vector3d(v.x / self.x, v.y / self.y, v.z / self.z)
+
+    # Инкрементальные арифметические операции (+=, -=, *=, /=)
+    def __iadd__(self, other):
+        v = self._to_vector(other)
+        if v is NotImplemented: return NotImplemented
+        self.x += v.x
+        self.y += v.y
+        self.z += v.z
+        return self
+
+    def __isub__(self, other):
+        v = self._to_vector(other)
+        if v is NotImplemented: return NotImplemented
+        self.x -= v.x
+        self.y -= v.y
+        self.z -= v.z
+        return self
+
+    def __imul__(self, other):
+        v = self._to_vector(other)
+        if v is NotImplemented: return NotImplemented
+        self.x *= v.x
+        self.y *= v.y
+        self.z *= v.z
+        return self
+
+    def __itruediv__(self, other):
+        v = self._to_vector(other)
+        if v is NotImplemented: return NotImplemented
+        if v.x == 0 or v.y == 0 or v.z == 0:
+            raise ZeroDivisionError("Деление на ноль компоненты вектора.")
+        self.x /= v.x
+        self.y /= v.y
+        self.z /= v.z
+        return self
+
+    # Векторное произведение (@)
+    def __matmul__(self, other):
+        if not isinstance(other, Vector3d):
+            return NotImplemented
+        cx = self.y * other.z - self.z * other.y
+        cy = self.z * other.x - self.x * other.z
+        cz = self.x * other.y - self.y * other.x
+        return Vector3d(cx, cy, cz)
+
+    # Геометрические проверки (статические методы)
+    @staticmethod
+    def is_collinear(a, b):
+        cross = a @ b
+        return abs(cross.x) < 1e-9 and abs(cross.y) < 1e-9 and abs(cross.z) < 1e-9
+
+    @staticmethod
+    def is_complanar(a, b, c):
+        cross_bc = b @ c
+        mixed_prod = a.x * cross_bc.x + a.y * cross_bc.y + a.z * cross_bc.z
+        return abs(mixed_prod) < 1e-9
+
+    # Доступ по индексу и названию
+    def __getitem__(self, item):
+        if item == 0 or item == 'x':
+            return self.x
+        elif item == 1 or item == 'y':
+            return self.y
+        elif item == 2 or item == 'z':
+            return self.z
+        else:
+            raise KeyError("Индекс должен быть 0, 1, 2 или 'x', 'y', 'z'")
+
+    # Поддержка цикла for
+    def __iter__(self):
+        yield self.x
+        yield self.y
+        yield self.z
+
+
+# =====================================================================
+# ДЕМОНСТРАЦИЯ РАБОТЫ ВСЕХ ПУНКТОВ ЗАДАНИЯ
+# =====================================================================
+if __name__ == "__main__":
+    print("--- 1. Создание векторов и магические методы __str__ и __repr__ ---")
+    v1 = Vector3d(3.14159, 4.2345, 5.6789)
+    print("Вывод __str__ :", str(v1))
+    print("Вывод __repr__:", repr(v1))
+    print()
+
+    print("--- 2. Фабричный метод from_points ---")
+    p_start = Point3d(1, 1, 1)
+    p_end = Point3d(4, 5, 6)
+    v_from_p = Vector3d.from_points(p_start, p_end)
+    print("Вектор из точек", p_start, "и", p_end, "равен:", v_from_p)
+    print()
+
+    print("--- 3. Операции сравнения (==, >, <) ---")
+    va = Vector3d(1, 2, 3)
+    vb = Vector3d(1, 2, 3)
+    vc = Vector3d(4, 5, 6)
+    print("va == vb:", va == vb)
+    print("va < vc :", va < vc)
+    print("vc > va :", vc > va)
+    print()
+
+    print("--- 4. Арифметические операции (+, -, *, /) с векторами и числами ---")
+    a = Vector3d(3, 4, 5)
+    print("Исходный вектор a:", a)
+    print("a + 3 :", a + 3)
+    print("3 + a :", 3 + a)
+    print("a - 1 :", a - 1)
+    print("10 - a:", 10 - a)
+    print("a * 2 :", a * 2)
+    print("a / 2 :", a / 2)
+    print()
+
+    print("--- 5. Инкрементальные операции (+=, -=, *=, /=) без создания нового объекта ---")
+    v_inc = Vector3d(1, 2, 3)
+    old_id = id(v_inc)
+    print("Вектор до += :", v_inc, f"(ID: {old_id})")
+    v_inc += 2
+    new_id = id(v_inc)
+    print("Вектор после +=:", v_inc, f"(ID: {new_id})")
+    print("ID совпадает?", old_id == new_id)
+    print()
+
+    print("--- 6. Векторное произведение (@) ---")
+    v_x = Vector3d(1, 0, 0)
+    v_y = Vector3d(0, 1, 0)
+    v_z = v_x @ v_y
+    print(f"Векторное произведение {v_x} @ {v_y} = {v_z}")
+    print()
+
+    print("--- 7. Проверка на коллинеарность и компланарность ---")
+    vec1 = Vector3d(1, 2, 3)
+    vec2 = Vector3d(2, 4, 6)  # Коллинеарен vec1
+    vec3 = Vector3d(1, 0, 1)
+    print("vec1 и vec2 коллинеарны?", Vector3d.is_collinear(vec1, vec2))
+    print("vec1 и vec3 коллинеарны?", Vector3d.is_collinear(vec1, vec3))
     
+    # Компланарность (три вектора в одной плоскости)
+    v_comp1 = Vector3d(1, 0, 0)
+    v_comp2 = Vector3d(0, 1, 0)
+    v_comp3 = Vector3d(1, 1, 0) # Лежит в той же плоскости XY
+    print("v_comp1, v_comp2, v_comp3 компланарны?", Vector3d.is_complanar(v_comp1, v_comp2, v_comp3))
+    print()
+
+    print("--- 8. Взятие длины вектора через len() ---")
+    v_len = Vector3d(3, 4, 0) # Точная длина = 5
+    print("Точная длина через .magnitude():", v_len.magnitude())
+    print("Округленная длина через len()   :", len(v_len))
+    print()
+
+    print("--- 9. Обращение по индексу и имени компоненты ---")
+    v_idx = Vector3d(10.5, 20.7, 30.9)
+    print("vector[0]   :", v_idx[0])
+    print("vector['y'] :", v_idx['y'])
+    print()
+
+    print("--- 10. Перебор по компонентам вектора (цикл for) ---")
+    v_for = Vector3d(7, 8, 9)
+    print("Компоненты вектора в цикле:")
+    for component in v_for:
+        print("->", component)
+
     # 11. Перебор по компонентам при помощи for
     print("Перебор компонент v3 в цикле for:")
     for comp in v3:
